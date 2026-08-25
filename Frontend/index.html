@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CMC — Assistant IA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="app-wrapper">
+
+    <!-- ── Sidebar ─────────────────────────────────────── -->
+    <aside class="sidebar" id="sidebar">
+
+      <div class="sidebar-logo">
+        <div class="logo-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+          </svg>
+        </div>
+        <div class="logo-text-block">
+          <span class="logo-name">CMC Assistant</span>
+          <span class="logo-sub">Rabat-Salé-Kénitra</span>
+        </div>
+        <button class="sidebar-close" id="sidebarClose" aria-label="Fermer le menu">✕</button>
+      </div>
+
+      <!-- Onglets Chat / Dashboard -->
+      <div class="sidebar-tabs">
+        <button class="tab-btn active" id="tabChat" onclick="App.switchTab('chat')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Chat
+        </button>
+        <button class="tab-btn" id="tabDash" onclick="App.switchTab('dashboard')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Dashboard
+        </button>
+      </div>
+
+      <!-- Contenu onglet Chat -->
+      <div id="chatTabContent">
+        <button class="new-chat-btn" id="newChatBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+          Nouvelle conversation
+        </button>
+
+        <div class="sidebar-section">
+          <p class="sidebar-section-title">Historique</p>
+          <nav class="history-list" id="historyList">
+            <p class="history-empty">Aucune conversation</p>
+          </nav>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-section">
+          <p class="sidebar-section-title">Paramètres</p>
+          <div class="config-block">
+            <label class="config-label" for="modelSelect">Modèle</label>
+            <select id="modelSelect" class="config-select">
+              <option value="qwen3-vl:2b-instruct-q8_0">qwen3-vl:2b-instruct-q8_0</option>
+            </select>
+          </div>
+          <div class="config-block">
+            <div class="config-row">
+              <label class="config-label" for="tempRange">Température</label>
+              <span id="tempVal" class="config-value">0.7</span>
+            </div>
+            <input type="range" id="tempRange" min="0" max="1" step="0.1" value="0.7" class="config-range" aria-label="Température" />
+          </div>
+          <div class="config-block">
+            <div class="config-row">
+              <label class="config-label" for="streamToggle">Streaming</label>
+              <label class="toggle" aria-label="Activer le streaming">
+                <input type="checkbox" id="streamToggle" checked />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="config-block">
+            <div class="config-row">
+              <label class="config-label" for="themeToggle">Mode clair</label>
+              <label class="toggle" aria-label="Activer le mode clair">
+                <input type="checkbox" id="themeToggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+          <div class="config-block">
+            <div class="config-row">
+              <label class="config-label" for="voiceOutToggle">Lecture vocale</label>
+              <label class="toggle" aria-label="Lire les réponses à voix haute">
+                <input type="checkbox" id="voiceOutToggle" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="sidebar-divider"></div>
+
+        <div class="sidebar-section sidebar-footer-section">
+          <div class="rag-status">
+            <span class="status-dot" id="ragDot"></span>
+            <span id="ragStatusText" class="config-label">RAG : initialisation…</span>
+          </div>
+          <button class="reindex-btn" id="reindexBtn">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+            Gérer les documents
+          </button>
+          <div class="server-status">
+            <span class="status-dot" id="serverDot"></span>
+            <span id="serverStatusText" class="config-label">Vérification…</span>
+          </div>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ── Zone principale ─────────────────────────── -->
+    <main class="chat-main">
+
+      <!-- Header commun -->
+      <header class="chat-header">
+        <button class="hamburger" id="hamburgerBtn" aria-label="Ouvrir le menu">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="header-center">
+          <span class="chat-model-badge" id="modelBadge">qwen3-vl:2b-instruct-q8_0</span>
+          <div class="chat-status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Prêt</span>
+          </div>
+        </div>
+        <button class="theme-btn" id="headerThemeBtn" aria-label="Changer le thème" title="Mode clair / sombre">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+        <button class="clear-btn" id="clearBtn">Effacer</button>
+      </header>
+
+      <!-- ── Vue Chat ──────────────────────────────── -->
+      <div id="viewChat">
+        <section class="messages-area" id="messagesArea">
+        </section>
+
+        <div class="error-bar" id="errorBar" style="display:none;"></div>
+
+        <footer class="input-area">
+          <div class="input-wrapper">
+            <button class="voice-btn" id="voiceBtn" aria-label="Dicter votre message" title="Dicter votre message">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                <line x1="12" y1="19" x2="12" y2="23"/>
+                <line x1="8" y1="23" x2="16" y2="23"/>
+              </svg>
+            </button>
+            <textarea id="msgInput" class="msg-input"
+              placeholder="Posez votre question… (Entrée pour envoyer)"
+              rows="1" aria-label="Message"></textarea>
+            <button class="send-btn" id="sendBtn" disabled aria-label="Envoyer">
+              <svg viewBox="0 0 24 24" width="17" height="17" fill="currentColor"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+            </button>
+          </div>
+          <p class="input-hint">Micro 🎤 · Mode clair ☀️ · Lecture vocale dans les paramètres</p>
+        </footer>
+      </div>
+
+      <!-- ── Vue Dashboard ─────────────────────────── -->
+      <div id="viewDashboard" style="display:none; flex:1; overflow-y:auto; padding:20px;">
+        <!-- KPIs -->
+        <div class="dash-header">
+          <h2 class="dash-title">Performances du chatbot</h2>
+          <div class="dash-controls">
+            <button class="dash-btn" id="refreshMetricsBtn">↻ Actualiser</button>
+            <label class="dash-auto-label">
+              <input type="checkbox" id="autoRefresh" onchange="Dashboard.toggleAuto()">
+              Auto 10s
+            </label>
+          </div>
+        </div>
+
+        <div class="dash-status" id="dashConnStatus">
+          <span class="status-dot gray" id="dashDot"></span>
+          <span id="dashStatusText">En attente…</span>
+          <span id="dashLastUpdate" style="margin-left:auto;font-size:11px;color:var(--text-muted)"></span>
+        </div>
+
+        <!-- Grille KPI -->
+        <div class="kpi-grid" id="kpiGrid"></div>
+
+        <!-- Graphiques -->
+        <div class="charts-row">
+          <div class="chart-card">
+            <h3 class="chart-title">Temps de réponse (20 derniers)</h3>
+            <div class="chart-legend">
+              <span class="legend-item"><span class="legend-sq" style="background:#2a78d6"></span>Succès</span>
+              <span class="legend-item"><span class="legend-sq" style="background:#e34948"></span>Erreur</span>
+            </div>
+            <div class="chart-wrap"><canvas id="timelineChart" role="img" aria-label="Graphique des temps de réponse"></canvas></div>
+          </div>
+          <div class="chart-card">
+            <h3 class="chart-title">Distribution des temps</h3>
+            <div class="dist-bars" id="distBars" style="margin-top:12px"></div>
+            <div class="percentile-row" id="percentileRow"></div>
+          </div>
+        </div>
+
+        <!-- Tableau historique -->
+        <div class="hist-section">
+          <p class="section-label">Historique des requêtes</p>
+          <div class="table-wrap">
+            <table class="perf-table" aria-label="Historique métriques">
+              <thead>
+                <tr>
+                  <th>Heure</th><th>Durée</th><th>TTFB</th>
+                  <th>Tokens</th><th>T/s</th><th>RAG</th><th>Score</th><th>Statut</th>
+                </tr>
+              </thead>
+              <tbody id="historyBody">
+                <tr><td colspan="8" style="text-align:center;padding:24px;color:var(--text-muted);font-size:13px">Cliquez sur Actualiser</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/dashboard.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
