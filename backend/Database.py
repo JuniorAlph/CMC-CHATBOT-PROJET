@@ -34,7 +34,9 @@ class MongoDB:
         except Exception as e:
             print(f"❌ MongoDB inacessible: {e}")
             print(" Le chatbot fonctionnera sans persistance")
-            self._client = None
+            if self.client:
+                self.client.close()
+            self.client = None
             self._db = None
             
     async def disconnect(self) -> None:
@@ -94,7 +96,7 @@ class MongoDB:
             old = ObjectId(conversation_id)
         except Exception:
             return False
-        await self._db.messages.delete_many({"conversation_id": conversation_id})
+        await self._db.messages.delete_many({"conversation_id": old})
         result = await self._db.conversations.delete_one({"_id": old})
         return result.deleted_count > 0
 
@@ -102,7 +104,7 @@ class MongoDB:
         """Met à jour le titre et la date de modification"""
         self._check()
         try:
-            await self._db.conversations.update_one({"id": ObjectId(conversation_id)},
+            await self._db.conversations.update_one({"_id": ObjectId(conversation_id)},
                                                    {"$set": {"title": title[:80], "updated_at": datetime.now(timezone.utc)}},)
         except Exception:
             pass
@@ -127,7 +129,11 @@ class MongoDB:
     async def get_messages(self, conversation_id: str) -> list[dict]:
         """Retourne les messages d'une conversation, triés par date de création."""
         self._check()
-        cursor = self._db.messages.find({"conversation_id": conversation_id}).sort("created_at", 1)
+        try:
+            object_id = ObjectId(conversation_id)
+        except Exception:
+            return []
+        cursor = self._db.messages.find({"conversation_id": object_id}).sort("created_at", 1)
         messages = []
         async for msg in cursor:
             messages.append({
